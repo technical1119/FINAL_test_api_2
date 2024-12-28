@@ -18,7 +18,7 @@ import json
 
 def create_webdirver():
     # Replace with your Railway URL
-    REMOTE_URL = "https://standalone-chrome-production-c37d.up.railway.app"
+    REMOTE_URL = "https://standalone-chrome-production-9ee2.up.railway.app"
 
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"
@@ -137,7 +137,9 @@ def get_links_from_webpage_Selenum(url):
                     links.append(href)
                 else:
                     links.append(url + href)
-        
+        # Always close the driver
+        driver.close()
+        driver.quit()
         print(len(links))
         return links
         
@@ -145,9 +147,8 @@ def get_links_from_webpage_Selenum(url):
         print(f"Error getting links with Selenium: {e}")
         return None
         
-    finally:
-        # Always close the driver
-        driver.quit()
+    
+
 
 
 
@@ -156,12 +157,14 @@ def get_website_content_selenium(url):
     return_content = str()
     
   
+    first_layer_links = get_links_from_webpage_Selenum(url)
+    print(first_layer_links)  # Reuse existing function
     driver = create_webdirver()
     
     try:
-        driver.get(url)
-        first_layer_links = get_links_from_webpage_Selenum(url)  # Reuse existing function
-        print(len(first_layer_links))
+    
+       
+        
         if first_layer_links:
             first_layer_links.append(url)
             for link in first_layer_links:
@@ -174,18 +177,12 @@ def get_website_content_selenium(url):
                     soup = BeautifulSoup(page_content, 'html.parser')
                     print("adding text with length: ", len(soup.get_text()), "\n")
                     return_content += soup.get_text() + " "
-                    
+        driver.close()
+        driver.quit()
         return return_content
         
     except Exception as e:
+        
         print(f"Error accessing URL: {url}. Error: {str(e)}")
         return None
         
-    finally:
-        driver.quit()
-
-
-
-print(get_website_content_selenium("https://www.swanchain.io/"))
-
-
