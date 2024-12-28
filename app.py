@@ -1,4 +1,4 @@
-from crypto_rank import get_links_from_webpage, get_social_links_from_overview, get_website_content_selenium, get_website_content_http
+from crypto_rank import get_website_content_selenium, get_website_content_http,get_links_from_webpage,get_social_links_from_overview
 from defilama import get_defilama_project_details, get_defilama_projects
 
 from fastapi import FastAPI, HTTPException
@@ -6,9 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
-from typing import Optional
 
-import uvicorn
 
 # Load environment variables
 load_dotenv()
@@ -22,7 +20,7 @@ app = FastAPI()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure appropriately for production
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -61,7 +59,7 @@ async def get_content_http(request: URLRequest):
 @app.post("/get_content_selenium")
 async def get_content_selenium(request: URLRequest):
     try:
-        content = get_website_content_selenium(request.url)
+        content = await get_website_content_selenium(request.url)
         if content is None:
             raise HTTPException(status_code=500, detail="Failed to get content")
         return {"content": content}
@@ -71,10 +69,10 @@ async def get_content_selenium(request: URLRequest):
 #------------------------------------------Defilama-----------------------------------------------------
 
 @app.get("/get_defilama_projects")
-async def get_defilama_projects_endpoint():
+def get_defilama_projects_endpoint():
     try:
         # Call the scraping function with a different name
-        projects = await get_defilama_projects()  # Note: not async if using Selenium
+        projects =  get_defilama_projects()  # Note: not async if using Selenium
         if projects is None:
             raise HTTPException(status_code=500, detail="Failed to fetch projects")
         return {"projects": projects}
@@ -102,5 +100,4 @@ def get_project_details_endpoint(request: URLRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 6000))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
