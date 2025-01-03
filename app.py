@@ -59,7 +59,7 @@ async def get_content_http(request: URLRequest):
 @app.post("/get_content_selenium")
 async def get_content_selenium(request: URLRequest):
     try:
-        content = await get_website_content_selenium(request.url)
+        content =  get_website_content_selenium(request.url)
         if content is None:
             raise HTTPException(status_code=500, detail="Failed to get content")
         return {"content": content}
