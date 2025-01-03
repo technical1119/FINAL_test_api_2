@@ -14,28 +14,28 @@ from webdriver_manager.core.os_manager import ChromeType
 import time
 
 import json
+import asyncio
 
 
-def create_webdirver():
-    # Replace with your Railway URL
+async def create_webdriver():
     REMOTE_URL = "https://standalone-chrome-production-9ee2.up.railway.app"
-
+    
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36"
     }
-    # Set up Chrome options
     options = Options()
     options.add_argument(f'user-agent={headers["User-Agent"]}')
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
 
-    # Connect to remote WebDriver
-    driver = webdriver.Remote(
-        command_executor=REMOTE_URL,
-        options=options
+    driver = await asyncio.get_event_loop().run_in_executor(
+        None,
+        lambda: webdriver.Remote(
+            command_executor=REMOTE_URL,
+            options=options
+        )
     )
-
     return driver
 
 
@@ -115,74 +115,74 @@ def get_website_content_http(url):
     
 
 
-def get_links_from_webpage_Selenum(url):
+async def get_links_from_webpage_Selenium(url):
     links = []
+    driver = await create_webdriver()
     
-
     try:
-        # Initialize the driver
-        driver = create_webdirver()
+        await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: driver.get(url)
+        )
+        await asyncio.sleep(2)
+
+        a_elements = await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: driver.find_elements(By.TAG_NAME, 'a')
+        )
         
-        # Get the page
-        driver.get(url)
-        time.sleep(2)
-        # Find all anchor elements
-        a_elements = driver.find_elements(By.TAG_NAME, 'a')
-        print(len(a_elements))
-        # Extract href attributes
         for a in a_elements:
-            href = a.get_attribute('href')
+            href = await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: a.get_attribute('href')
+            )
             if href:
                 if "https://" in href or "http://" in href:
                     links.append(href)
                 else:
                     links.append(url + href)
-        # Always close the driver
-        driver.close()
-        driver.quit()
-        print(len(links))
         return links
-        
     except Exception as e:
         print(f"Error getting links with Selenium: {e}")
         return None
-        
-    
+    finally:
+        await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: (driver.close(), driver.quit())
+        )
 
 
-
-
-
-def get_website_content_selenium(url):
+async def get_website_content_selenium(url):
     return_content = str()
-    
-  
-    first_layer_links = get_links_from_webpage_Selenum(url)
-    print(first_layer_links)  # Reuse existing function
-    driver = create_webdirver()
+    first_layer_links = await get_links_from_webpage_Selenium(url)
+    driver = await create_webdriver()
     
     try:
-    
-       
-        
         if first_layer_links:
             first_layer_links.append(url)
             for link in first_layer_links:
                 if url in link:
                     print("Getting content from: ", link, "\n")
-                    driver.get(link)
+                    await asyncio.get_event_loop().run_in_executor(
+                        None,
+                        lambda: driver.get(link)
+                    )
                     
-                    # Get page content
-                    page_content = driver.page_source
+                    page_content = await asyncio.get_event_loop().run_in_executor(
+                        None,
+                        lambda: driver.page_source
+                    )
                     soup = BeautifulSoup(page_content, 'html.parser')
                     print("adding text with length: ", len(soup.get_text()), "\n")
                     return_content += soup.get_text() + " "
-        driver.close()
-        driver.quit()
         return return_content
-        
     except Exception as e:
-        
         print(f"Error accessing URL: {url}. Error: {str(e)}")
         return None
+    finally:
+        await asyncio.get_event_loop().run_in_executor(
+            None,
+            lambda: (driver.close(), driver.quit())
+        )
         
+
