@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
-import time
 
 
 # Load environment variables
@@ -30,7 +29,6 @@ app.add_middleware(
 @app.post("/get_links")
 async def get_links(request: URLRequest):
     try:
-        
         links = get_links_from_webpage(request.url)
         if links is None:
             raise HTTPException(status_code=500, detail="Failed to get links")
@@ -41,7 +39,6 @@ async def get_links(request: URLRequest):
 @app.post("/get_social")
 async def get_social(request: URLRequest):
     try:
-        
         social_links = get_social_links_from_overview(request.url)
         if social_links is None:
             raise HTTPException(status_code=500, detail="Failed to get social links")
@@ -62,8 +59,7 @@ async def get_content_http(request: URLRequest):
 @app.post("/get_content_selenium")
 async def get_content_selenium(request: URLRequest):
     try:
-        time.sleep(5)
-        content =  get_website_content_selenium(request.url)
+        content = await get_website_content_selenium(request.url)
         if content is None:
             raise HTTPException(status_code=500, detail="Failed to get content")
         return {"content": content}
@@ -73,11 +69,10 @@ async def get_content_selenium(request: URLRequest):
 #------------------------------------------Defilama-----------------------------------------------------
 
 @app.get("/get_defilama_projects")
-def get_defilama_projects_endpoint():
+async def get_defilama_projects_endpoint():
     try:
         # Call the scraping function with a different name
-        time.sleep(5)
-        projects =  get_defilama_projects()  # Note: not async if using Selenium
+        projects =  await get_defilama_projects()  # Note: not async if using Selenium
         if projects is None:
             raise HTTPException(status_code=500, detail="Failed to fetch projects")
         return {"projects": projects}
@@ -86,15 +81,14 @@ def get_defilama_projects_endpoint():
     
 
 @app.post("/get_defilama_project_details")
-def get_project_details_endpoint(request: URLRequest):
+async def get_project_details_endpoint(request: URLRequest):
     try:
         # Validate URL
         if not request.url or not request.url.startswith("https://defillama.com/protocol/"):
             raise HTTPException(status_code=400, detail="Invalid DeFiLlama URL")
 
         # Get project details
-        time.sleep(5)
-        social_links = get_defilama_project_details(request.url)
+        social_links = await get_defilama_project_details(request.url)
         
         if social_links is None:
             raise HTTPException(status_code=500, detail="Failed to fetch project details")
