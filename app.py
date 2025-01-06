@@ -1,4 +1,4 @@
-from crypto_rank import get_website_content_selenium, get_website_content_http,get_links_from_webpage,get_social_links_from_overview
+from crypto_rank import get_website_content_selenium, get_website_content_http,get_links_from_webpage,get_social_links_from_overview, get_links_from_webpage_Selenium
 from defilama import get_defilama_project_details, get_defilama_projects
 
 from fastapi import FastAPI, HTTPException
@@ -30,6 +30,16 @@ app.add_middleware(
 async def get_links(request: URLRequest):
     try:
         links = get_links_from_webpage(request.url)
+        if links is None:
+            raise HTTPException(status_code=500, detail="Failed to get links")
+        return {"content": links}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/get_links_selenium")
+async def get_links_selenium(request: URLRequest):
+    try:
+        links = await get_links_from_webpage_Selenium(request.url)
         if links is None:
             raise HTTPException(status_code=500, detail="Failed to get links")
         return {"content": links}
