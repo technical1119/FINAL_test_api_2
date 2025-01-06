@@ -11,6 +11,7 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.core.os_manager import ChromeType
 
+from urllib.parse import urlparse
 import time
 
 import json
@@ -141,6 +142,7 @@ async def get_links_from_webpage_Selenium(url):
                     links.append(href)
                 else:
                     links.append(url + href)
+        print(links)
         return links
     except Exception as e:
         print(f"Error getting links with Selenium: {e}")
@@ -156,12 +158,15 @@ async def get_website_content_selenium(url):
     return_content = str()
     first_layer_links = await get_links_from_webpage_Selenium(url)
     driver = await create_webdriver()
-    
+    print(first_layer_links)
     try:
         if first_layer_links:
+            print("some links found")
             first_layer_links.append(url)
             for link in first_layer_links:
-                if url in link:
+                link_domain = urlparse(link).netloc
+                print(link_domain)
+                if link_domain in url:
                     print("Getting content from: ", link, "\n")
                     await asyncio.get_event_loop().run_in_executor(
                         None,
@@ -185,4 +190,5 @@ async def get_website_content_selenium(url):
             lambda: (driver.close(), driver.quit())
         )
         
+
 
