@@ -101,7 +101,7 @@ async def get_project_details_endpoint(request: URLRequest):
         social_links = await get_defilama_project_details(request.url)
         
         if social_links is None:
-            raise HTTPException(status_code=500, detail="Failed to fetch project details")
+            return {"social_links": None}
             
         return {"social_links": social_links}
         
