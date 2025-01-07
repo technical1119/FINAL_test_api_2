@@ -15,6 +15,9 @@ load_dotenv()
 class URLRequest(BaseModel):
     url: str
 
+class URLListRequest(BaseModel):
+    urls: list[str]
+
 app = FastAPI()
 
 # Configure CORS
@@ -102,16 +105,15 @@ async def get_project_details_endpoint(request: URLRequest):
         
         if social_links is None:
             return {"social_links": None}
-            
         return {"social_links": social_links}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/get_page_content_selenium")
-async def get_page_content_selenium_endpoint(request: URLRequest):
+async def get_page_content_selenium_endpoint(request: URLListRequest):
     try:
-        content = await get_page_content_selenium(request.url)
+        content = await get_page_content_selenium(request.urls)
         if content is None:
             raise HTTPException(status_code=500, detail="Failed to get content")
         return {"content": content}
@@ -121,4 +123,5 @@ async def get_page_content_selenium_endpoint(request: URLRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
 
