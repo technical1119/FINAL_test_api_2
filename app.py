@@ -1,4 +1,4 @@
-from crypto_rank import get_website_content_selenium, get_website_content_http,get_links_from_webpage,get_social_links_from_overview, get_links_from_webpage_Selenium
+from crypto_rank import get_website_content_selenium, get_website_content_http,get_links_from_webpage,get_social_links_from_overview, get_links_from_webpage_Selenium, get_page_content_selenium
 from defilama import get_defilama_project_details, get_defilama_projects
 
 from fastapi import FastAPI, HTTPException
@@ -108,6 +108,17 @@ async def get_project_details_endpoint(request: URLRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/get_page_content_selenium")
+async def get_page_content_selenium_endpoint(request: URLRequest):
+    try:
+        content = await get_page_content_selenium(request.url)
+        if content is None:
+            raise HTTPException(status_code=500, detail="Failed to get content")
+        return {"content": content}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
