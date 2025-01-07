@@ -190,5 +190,44 @@ async def get_website_content_selenium(url):
             lambda: (driver.close(), driver.quit())
         )
         
+async def get_page_content_selenium(list_of_urls):
+    return_content = str()
+    if len(list_of_urls) > 1:
+        driver = await create_webdriver()
+        try:
+           
+            for link in list_of_urls:
+                await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    lambda: driver.get(link)
+                )
+                        
+                page_content = await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    lambda: driver.page_source
+                )
+
+                soup = BeautifulSoup(page_content, 'html.parser')
+                print("adding text with length: ", len(soup.get_text()), "\n")
+                return_content += soup.get_text() + " "
+
+            await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: (driver.close(), driver.quit())
+            )
+            return return_content
+        except Exception as e:
+            await asyncio.get_event_loop().run_in_executor(
+                None,
+                lambda: (driver.close(), driver.quit())
+            )
+            return None
+    
+    else:
+        return None
+    
+        
+
+        
 
 
