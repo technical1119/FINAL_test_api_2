@@ -106,6 +106,30 @@ async def get_defilama_project_details(url):
                     "name": social_name,
                     "link": social_link
                 })
+
+        # get the forkend from info 
+        try:
+            forked_from  = await asyncio.get_event_loop().run_in_executor(
+                None, 
+                lambda: driver.find_element(By.XPATH, "//*[@id='__next']/main/div/div[2]/div[2]/div[1]/p[3]")
+            )
+        except:
+            print("No forked from info found")
+            social_links.append({"forked_from": None})
+            return social_links
+        try:
+            if forked_from:
+                forked_from_text = await asyncio.get_event_loop().run_in_executor(
+                    None,
+                    lambda: forked_from.get_property("textContent")
+                )
+                forked_from = forked_from_text.split(":")[1]
+                forked_from = forked_from.strip()
+                social_links.append({"forked_from": forked_from})
+        except:
+            print("No forked from info found")
+            return social_links.append({"forked_from": None})
+            
         return social_links
     except Exception as e:
         print(f"Error getting page source: {e}")
@@ -116,4 +140,5 @@ async def get_defilama_project_details(url):
             lambda: (driver.close(), driver.quit())
         )
 
+print(asyncio.run(get_defilama_project_details("https://defillama.com/protocol/goldstation-dex-v3")))
 
