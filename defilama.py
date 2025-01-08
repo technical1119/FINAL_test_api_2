@@ -140,5 +140,4 @@ async def get_defilama_project_details(url):
             lambda: (driver.close(), driver.quit())
         )
 
-print(asyncio.run(get_defilama_project_details("https://defillama.com/protocol/goldstation-dex-v3")))
 
