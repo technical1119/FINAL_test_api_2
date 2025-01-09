@@ -123,7 +123,14 @@ async def get_defilama_project_details(url):
                     None,
                     lambda: forked_from.get_property("textContent")
                 )
-                forked_from = forked_from_text.split(":")[1]
+                if "Forked from" in forked_from_text:
+                    forked_from = forked_from_text.split(":")[1]
+                    forked_from = forked_from.strip()
+                    social_links.append({"forked_from": forked_from})
+                else:
+                    social_links.append({"forked_from": None})
+                    return social_links
+                    
                 forked_from = forked_from.strip()
                 social_links.append({"forked_from": forked_from})
         except:
@@ -139,5 +146,3 @@ async def get_defilama_project_details(url):
             None,
             lambda: (driver.close(), driver.quit())
         )
-
-
