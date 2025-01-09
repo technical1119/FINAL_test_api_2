@@ -191,8 +191,9 @@ async def get_website_content_selenium(url):
         )
         
 async def get_page_content_selenium(list_of_urls):
+    print(type(list_of_urls))
     return_content = str()
-    if len(list_of_urls) > 1:
+    if len(list_of_urls) > 0:
         driver = await create_webdriver()
         try:
            
@@ -225,6 +226,7 @@ async def get_page_content_selenium(list_of_urls):
     
     else:
         return None
+
     
         
 
