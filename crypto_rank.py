@@ -18,6 +18,21 @@ import json
 import asyncio
 
 
+SOCIAL_MEDIA_DOMAINS = [
+    "x.com",
+    "t.me",  # Telegram
+    "medium.com",
+    "discord.gg",
+    "discord.com",
+    "linkedin.com",
+    "reddit.com",
+    "youtube.com",
+    "facebook.com",
+    "instagram.com",
+    "tiktok.com",
+    
+]
+
 async def create_webdriver():
     REMOTE_URL = "https://standalone-chrome-production-9ee2.up.railway.app"
     
@@ -80,7 +95,13 @@ def get_links_from_webpage(url):
                     links.append(href)
                 else: 
                     links.append(url + href)
-
+        # remove  duplicates 
+        links = list(set(links))
+        print(links)
+        # remove social links 
+        for link in links:
+            if any(domain in link for domain in SOCIAL_MEDIA_DOMAINS):
+                links.remove(link)
         print(len(links))
         return links
     else:
@@ -117,6 +138,7 @@ def get_website_content_http(url):
 
 
 async def get_links_from_webpage_Selenium(url):
+    
     links = []
     driver = await create_webdriver()
     
@@ -142,7 +164,13 @@ async def get_links_from_webpage_Selenium(url):
                     links.append(href)
                 else:
                     links.append(url + href)
+        # remove  duplicates 
+        links = list(set(links))
         print(links)
+        # remove social links 
+        for link in links:
+            if any(domain in link for domain in SOCIAL_MEDIA_DOMAINS):
+                links.remove(link)
         return links
     except Exception as e:
         print(f"Error getting links with Selenium: {e}")
@@ -226,6 +254,11 @@ async def get_page_content_selenium(list_of_urls):
     
     else:
         return None
+    
+        
+
+
+
 
     
         
